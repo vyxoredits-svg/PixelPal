@@ -85,7 +85,21 @@ export class PixelPal {
         this.actionActive = false;
         this.actionType = '';
         this.actionTimer = null;
-        this.isSleepingState = false; 
+        this.isSleepingState = false;
+
+        // Cooldown timestamps — storing when each action was LAST performed
+        this.cooldowns = {
+            feed: 0,
+            play: 0,
+            pet:  0
+        };
+
+        // Cooldown durations in milliseconds (feel free to tune these)
+        this.cooldownDurations = {
+            feed: 30 * 1000,  // 30 seconds — Pixel needs time to digest
+            play: 45 * 1000,  // 45 seconds — needs a breather after playtime
+            pet:  15 * 1000   // 15 seconds — just a little personal space, please
+        };
 
         this.activeGameId = null;
         this.activeGameTimer = null;
@@ -135,10 +149,18 @@ export class PixelPal {
         // Start loops
         this.startGameLoop();
         this.startRenderLoop();
+        this.startCooldownTick();
 
-        // Check if onboarding is needed
+        // Check if onboarding is needed.
+        // If there's existing save data but no tutorial flag, player is a returning user — skip it.
+        const hasExistingSave = !!localStorage.getItem('pixelpal_stats');
         if (!localStorage.getItem('pixelpal_tutorial_completed')) {
-            this.startTutorial();
+            if (hasExistingSave) {
+                // Mark as complete silently so it never shows again
+                localStorage.setItem('pixelpal_tutorial_completed', 'true');
+            } else {
+                this.startTutorial();
+            }
         }
     }
 
@@ -152,6 +174,9 @@ export class PixelPal {
 
     startGameLoop() {
         setInterval(() => {
+            // Update quests before applying decay to prevent 100% happiness quest checks failing due to immediate decay.
+            this.updateQuestProgress('happy100', this.stats.happiness);
+
             if (!this.isSleepingState) {
                 this.stats.hunger = Math.max(0, this.stats.hunger - 0.5);
                 
@@ -173,8 +198,6 @@ export class PixelPal {
                     this.toggleSleep(true); 
                 }
             }
-
-            this.updateQuestProgress('happy100', this.stats.happiness);
 
             this.checkStateRules();
             this.checkAchievementUnlocks();
@@ -337,6 +360,11 @@ export class PixelPal {
 
     feed() {
         if (this.isSleepingState) return;
+        if (this.isOnCooldown('feed')) {
+            const secs = this.getRemainingCooldown('feed');
+            this.triggerSpeechBubble(`Pixel is still digesting... ${secs}s left! 🐟`);
+            return;
+        }
         if (this.stats.hunger >= 100) {
             this.triggerSpeechBubble("Pixel is already full! 😺");
             return;
@@ -344,6 +372,7 @@ export class PixelPal {
 
         this.stats.hunger = Math.min(100, this.stats.hunger + 25);
         this.history.totalFeeds += 1;
+        this.startCooldown('feed');
         
         Sound.playFeed();
         this.addXP(10);
@@ -363,6 +392,11 @@ export class PixelPal {
 
     play() {
         if (this.isSleepingState) return;
+        if (this.isOnCooldown('play')) {
+            const secs = this.getRemainingCooldown('play');
+            this.triggerSpeechBubble(`Pixel needs a breather! ${secs}s to recover 🎾`);
+            return;
+        }
         if (this.stats.energy < 15) {
             this.triggerSpeechBubble("Too tired to play... zZZ 💤");
             return;
@@ -371,6 +405,7 @@ export class PixelPal {
         this.stats.happiness = Math.min(100, this.stats.happiness + 20);
         this.stats.energy = Math.max(0, this.stats.energy - 15);
         this.history.totalPlays += 1;
+        this.startCooldown('play');
 
         Sound.playPlay();
 
@@ -418,9 +453,15 @@ export class PixelPal {
 
     pet() {
         if (this.isSleepingState) return;
+        if (this.isOnCooldown('pet')) {
+            const secs = this.getRemainingCooldown('pet');
+            this.triggerSpeechBubble(`Give Pixel a sec! Too many pats at once! (${secs}s) 🐾`);
+            return;
+        }
 
         this.stats.happiness = Math.min(100, this.stats.happiness + 10);
         this.history.totalPets += 1;
+        this.startCooldown('pet');
 
         Sound.playPet();
         this.addXP(8);
@@ -437,8 +478,65 @@ export class PixelPal {
         this.saveGame();
     }
 
+    // ─── Cooldown System ─────────────────────────────────────────────────────
+
+    startCooldown(action) {
+        this.cooldowns[action] = Date.now();
+        this.updateCooldownUI(action);
+        // Persist so cooldowns survive page reloads
+        localStorage.setItem('pixelpal_cooldowns', JSON.stringify(this.cooldowns));
+    }
+
+    isOnCooldown(action) {
+        const elapsed = Date.now() - (this.cooldowns[action] || 0);
+        return elapsed < this.cooldownDurations[action];
+    }
+
+    getRemainingCooldown(action) {
+        const elapsed = Date.now() - (this.cooldowns[action] || 0);
+        return Math.max(0, Math.ceil((this.cooldownDurations[action] - elapsed) / 1000));
+    }
+
+    startCooldownTick() {
+        // Update cooldown overlays every second
+        setInterval(() => {
+            ['feed', 'play', 'pet'].forEach(action => this.updateCooldownUI(action));
+        }, 1000);
+    }
+
+    updateCooldownUI(action) {
+        const btnId = `btn-${action}`;
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+
+        const remaining = this.getRemainingCooldown(action);
+        const duration = this.cooldownDurations[action] / 1000;
+        const onCd = this.isOnCooldown(action);
+
+        // Progress ratio 0→1 as cooldown drains
+        const progress = onCd ? (remaining / duration) : 0;
+
+        let timerEl = btn.querySelector('.cd-timer');
+        if (onCd) {
+            btn.classList.add('on-cooldown');
+            btn.style.setProperty('--cd-progress', progress);
+            if (!timerEl) {
+                timerEl = document.createElement('span');
+                timerEl.className = 'cd-timer';
+                btn.appendChild(timerEl);
+            }
+            timerEl.textContent = `${remaining}s`;
+        } else {
+            btn.classList.remove('on-cooldown');
+            btn.style.removeProperty('--cd-progress');
+            if (timerEl) timerEl.remove();
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     setActionsDisabled(disabled) {
-        UI.bindEvents(this); // Just to ensure bindings, but we disabled them here:
+        // Do NOT call UI.bindEvents here. Events are already bound once in the constructor.
         document.getElementById('btn-feed').disabled = disabled;
         document.getElementById('btn-play').disabled = disabled;
         document.getElementById('btn-pet').disabled = disabled;
@@ -714,7 +812,7 @@ export class PixelPal {
         
         if (!reqText || !claimBtn) return;
 
-        currentLvlDisplay.textContent = this.stats.level;
+        if (currentLvlDisplay) currentLvlDisplay.textContent = this.stats.level;
         const eligible = this.stats.level >= 30;
 
         if (eligible) {

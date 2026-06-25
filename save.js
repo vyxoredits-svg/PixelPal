@@ -44,6 +44,7 @@ export function loadGame(game) {
     const savedPrestige = localStorage.getItem('pixelpal_prestige');
     const savedSoundEnabled = localStorage.getItem('pixelpal_sound_enabled');
     const savedVolume = localStorage.getItem('pixelpal_volume');
+    const savedCooldowns = localStorage.getItem('pixelpal_cooldowns');
 
     if (savedStats) game.stats = { ...game.stats, ...JSON.parse(savedStats) };
     if (savedHistory) game.history = { ...game.history, ...JSON.parse(savedHistory) };
@@ -54,6 +55,7 @@ export function loadGame(game) {
     if (savedQuests) game.quests = { ...game.quests, ...JSON.parse(savedQuests) };
     if (savedCollection) game.collection = { ...game.collection, ...JSON.parse(savedCollection) };
     if (savedPrestige) game.prestige = { ...game.prestige, ...JSON.parse(savedPrestige) };
+    if (savedCooldowns) game.cooldowns = { ...game.cooldowns, ...JSON.parse(savedCooldowns) };
 
     // Save Data Validation & Hardening
     validateAndRepairState(game);
@@ -104,6 +106,13 @@ export function loadGame(game) {
     game.renderCollection();
     game.renderPrestige();
     game.history.lastLoginDate = now;
+
+    // Restore cooldown overlays for any actions still cooling down after reload
+    ['feed', 'play', 'pet'].forEach(action => {
+        if (typeof game.updateCooldownUI === 'function') {
+            game.updateCooldownUI(action);
+        }
+    });
 }
 
 export function validateAndRepairState(game) {

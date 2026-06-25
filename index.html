@@ -324,11 +324,17 @@
         <!-- Onboarding Tutorial Overlay -->
         <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
             <div class="tutorial-card">
+                <button class="tutorial-close-btn" id="btn-tutorial-close" title="Skip tutorial">×</button>
                 <h3 id="tutorial-title">Welcome to PixelPal!</h3>
                 <p id="tutorial-text">This is your virtual cat companion workspace. Let's learn the basics!</p>
+                <div class="tutorial-step-indicator">
+                    <div class="tutorial-dot active" id="tdot-0"></div>
+                    <div class="tutorial-dot" id="tdot-1"></div>
+                    <div class="tutorial-dot" id="tdot-2"></div>
+                </div>
                 <div class="tutorial-footer">
                     <button class="btn btn-choice" id="btn-tutorial-skip">Skip</button>
-                    <button class="btn btn-equip" id="btn-tutorial-next">Next</button>
+                    <button class="btn btn-equip" id="btn-tutorial-next">Next →</button>
                 </div>
             </div>
         </div>

@@ -477,6 +477,50 @@ body {
     cursor: not-allowed;
 }
 
+/* Cooldown overlay — the purple sweep drains as the timer counts down */
+.btn-action.on-cooldown {
+    cursor: not-allowed;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Frosted sweep effect using a pseudo-element + CSS custom property */
+.btn-action.on-cooldown::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* Progress variable injected via JS: 1 = full cooldown, 0 = ready */
+    background: linear-gradient(
+        to top,
+        rgba(139, 92, 246, 0.35) calc(var(--cd-progress, 0) * 100%),
+        transparent calc(var(--cd-progress, 0) * 100%)
+    );
+    border-radius: inherit;
+    pointer-events: none;
+    transition: background 0.5s linear;
+}
+
+/* Countdown number shown at bottom of the button */
+.cd-timer {
+    position: absolute;
+    bottom: 5px;
+    right: 8px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #c4b5fd;
+    font-family: var(--font-pixel);
+    letter-spacing: 0px;
+    text-shadow: 0 0 6px rgba(139, 92, 246, 0.8);
+    pointer-events: none;
+    z-index: 10;
+    animation: cdPulse 1s ease-in-out infinite;
+}
+
+@keyframes cdPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
 .btn-icon {
     font-size: 1.8rem;
     margin-bottom: 4px;
@@ -1491,8 +1535,8 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(18, 16, 22, 0.7);
-    backdrop-filter: blur(3px);
+    background: rgba(18, 16, 22, 0.88);
+    backdrop-filter: blur(6px);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -1501,23 +1545,88 @@ body {
 }
 
 .tutorial-card {
-    background: var(--panel-bg);
+    background: linear-gradient(135deg, rgba(26, 21, 36, 0.98), rgba(40, 28, 58, 0.98));
     border: 2px solid var(--accent);
-    box-shadow: 0 0 25px var(--accent-glow);
-    border-radius: 16px;
-    padding: 20px;
+    box-shadow: 0 0 40px var(--accent-glow), 0 20px 60px rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+    padding: 28px;
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
+    position: relative;
+    animation: tutorialPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes tutorialPop {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.tutorial-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e879f9;
+}
+
+.tutorial-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.tutorial-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.tutorial-close-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.tutorial-step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.tutorial-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.3s;
+}
+
+.tutorial-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
 }
 
 .tutorial-footer {
     display: flex;
     justify-content: space-between;
-    gap: 15px;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+/* Spotlight: subtle border highlight only, no z-index tricks */
+.spotlight-active {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 20px var(--accent-glow) !important;
+    border-color: var(--accent) !important;
 }
 
 /* Developer Dashboard Overlay */

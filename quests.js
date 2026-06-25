@@ -67,6 +67,7 @@ function claimQuestReward(game, quest) {
     } else if (quest.type === 'cosmetic') {
         if (!game.cosmetics.unlocked.includes(quest.val)) {
             game.cosmetics.unlocked.push(quest.val);
+            game.unlockCollectionItem('accessories', quest.val);
         }
         game.triggerSpeechBubble(`🏆 Look what you unlocked! New Hat: ${quest.val}!`);
         game.renderCloset();

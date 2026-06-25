@@ -73,44 +73,48 @@ export function startTutorial(game) {
     if (overlay) {
         overlay.style.display = 'flex';
         showTutorialStep(game);
+
+        // Clicking the dark backdrop dismisses the tutorial
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) completeTutorial(game);
+        }, { once: false });
     }
 }
 
 export function showTutorialStep(game) {
     const titleEl = document.getElementById('tutorial-title');
-    const textEl = document.getElementById('tutorial-text');
-    
-    // Remove spotlight from previous elements
-    document.querySelectorAll('.spotlight-active').forEach(el => el.classList.remove('spotlight-active'));
+    const textEl  = document.getElementById('tutorial-text');
 
     const steps = [
         {
-            title: "Welcome to PixelPal!",
-            text: "Meet Pixel, your virtual cozy cat companion! Let's show you how to take care of them.",
-            highlightId: "cat-stage-wrapper"
+            title: "Welcome to PixelPal! 🐱",
+            text: "Meet Pixel, your virtual cozy cat companion! Let's show you how to take care of them."
         },
         {
-            title: "Keep Pixel Healthy",
-            text: "Watch these meters: Satiety, Happiness, and Energy! If they drop too low, Pixel will become hungry or sleepy.",
-            highlightId: "hunger-fill"
+            title: "Keep Pixel Healthy 💖",
+            text: "Watch these three meters: Satiety, Happiness, and Energy! If they drop too low, Pixel gets hungry or sleepy."
         },
         {
-            title: "Interact & Level Up",
-            text: "Use actions (Feed, Play, Pet, Sleep) or purchase accessories/furniture in the Shop tab to earn coins and raise Friendship levels!",
-            highlightId: "btn-feed"
+            title: "Interact & Level Up ✨",
+            text: "Use Feed, Play, Pet and Sleep to earn XP and coins. Check the Shop tab for accessories and furniture!"
         }
     ];
 
     const step = steps[game.tutorialStep];
-    if (titleEl && textEl) {
+    if (titleEl && textEl && step) {
         titleEl.textContent = step.title;
-        textEl.textContent = step.text;
+        textEl.textContent  = step.text;
     }
 
-    const highlightEl = document.getElementById(step.highlightId);
-    if (highlightEl) {
-        highlightEl.classList.add('spotlight-active');
+    // Update step indicator dots
+    for (let i = 0; i < 3; i++) {
+        const dot = document.getElementById(`tdot-${i}`);
+        if (dot) dot.classList.toggle('active', i === game.tutorialStep);
     }
+
+    // Update Next button text on last step
+    const nextBtn = document.getElementById('btn-tutorial-next');
+    if (nextBtn) nextBtn.textContent = game.tutorialStep === 2 ? "Let's Go! 🎉" : 'Next →';
 }
 
 export function nextTutorial(game) {
@@ -123,7 +127,9 @@ export function nextTutorial(game) {
 }
 
 export function completeTutorial(game) {
-    document.getElementById('tutorial-overlay').style.display = 'none';
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) overlay.style.display = 'none';
+    // Clean up any leftover spotlight highlights (just in case)
     document.querySelectorAll('.spotlight-active').forEach(el => el.classList.remove('spotlight-active'));
     localStorage.setItem('pixelpal_tutorial_completed', 'true');
     game.triggerSpeechBubble("Tutorial complete! Let's become best friends! 😸");
@@ -259,6 +265,7 @@ export function bindEvents(game) {
     // Onboarding Tutorial buttons bindings
     document.getElementById('btn-tutorial-skip').addEventListener('click', () => game.completeTutorial());
     document.getElementById('btn-tutorial-next').addEventListener('click', () => game.nextTutorial());
+    document.getElementById('btn-tutorial-close').addEventListener('click', () => game.completeTutorial());
 
     document.getElementById('prestige-claim-btn').addEventListener('click', () => game.prestigeRebirth());
 
