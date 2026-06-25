@@ -215,6 +215,7 @@ export class PixelPal {
         requestAnimationFrame(render);
     }
 
+    // Offline progression simulation. Triggers when the user returns after closing the tab.
     processOfflineProgression(totalSeconds) {
         const decayHungerRate = 45;
         const decayHappinessRate = 60;
@@ -300,7 +301,7 @@ export class PixelPal {
             this.updateQuestProgress('gainLvl', 1);
 
             Sound.playLevelUp();
-            this.triggerSpeechBubble(`✨ LEVEL UP! Pixel is now level ${this.stats.level}! (+${levelCoins} coins) 🎉`);
+            this.triggerSpeechBubble(`✨ Oh look! Pixel grew stronger and is now Level ${this.stats.level}! (+${levelCoins} coins) 🎉`);
             this.createFloatingParticle('🎉');
             this.saveGame();
             this.renderCloset(); 
@@ -323,7 +324,7 @@ export class PixelPal {
             this.stats.friendshipLevel += 1;
             this.stats.friendshipXpNeeded = this.stats.friendshipLevel * 100;
             Sound.playLevelUp();
-            this.triggerSpeechBubble(`🤝 Friend Rank Up! Friendship Level is now ${this.stats.friendshipLevel}! ❤️`);
+            this.triggerSpeechBubble(`🤝 Pixel seems a little closer to you today! Friendship level up! ❤️`);
             this.createFloatingParticle('💖');
             
             if (this.stats.friendshipLevel === 5) {

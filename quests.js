@@ -60,15 +60,15 @@ function claimQuestReward(game, quest) {
 
     if (quest.type === 'coins') {
         game.addCoins(quest.amt);
-        game.triggerSpeechBubble(`🏆 Daily Quest completed! Recieved +${quest.amt} Coins!`);
+        game.triggerSpeechBubble(`🏆 Amazing! Completed a daily quest: +${quest.amt} Coins!`);
     } else if (quest.type === 'xp') {
         game.addXP(quest.amt);
-        game.triggerSpeechBubble(`🏆 Weekly Quest completed! Recieved +${quest.amt} XP!`);
+        game.triggerSpeechBubble(`🏆 Milestone reached! Weekly quest complete: +${quest.amt} XP!`);
     } else if (quest.type === 'cosmetic') {
         if (!game.cosmetics.unlocked.includes(quest.val)) {
             game.cosmetics.unlocked.push(quest.val);
         }
-        game.triggerSpeechBubble(`🏆 Weekly Quest completed! Unlocked Hat: ${quest.val}!`);
+        game.triggerSpeechBubble(`🏆 Look what you unlocked! New Hat: ${quest.val}!`);
         game.renderCloset();
     }
     game.saveGame();

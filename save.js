@@ -162,7 +162,7 @@ export function exportSave(game) {
         downloadAnchor.click();
         downloadAnchor.remove();
         
-        game.triggerSpeechBubble("Save file exported successfully! Check your downloads folder. 📤");
+        game.triggerSpeechBubble("Pixel's diary has been packaged up! Saved to your downloads folder. 📤");
     } catch (e) {
         console.error("Save export error:", e);
         alert("Could not export save. Please try again.");
@@ -198,7 +198,7 @@ export function importSave(game, event) {
             game.saveGame();
             game.loadGame();
 
-            game.triggerSpeechBubble("Save file imported successfully! Progress restored. 📥");
+            game.triggerSpeechBubble("Welcome back! Pixel's memories have been safely restored. 📥");
             Sound.playLevelUp();
         } catch (err) {
             console.error("Import error:", err);

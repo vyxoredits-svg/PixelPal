@@ -1,0 +1,22 @@
+# GitHub Repository Metadata for PixelPal
+
+## Repository Description (max 150 characters)
+Cozy 8-bit virtual cat companion game in your browser. Features programmatic animations, shop, minigames, quests, prestige, offline PWA support.
+
+## Repository Topics
+- virtual-pet
+- pixel-art
+- pwa
+- cozy-game
+- retro-game
+- es6-modules
+- offline-support
+- single-page-app
+- HTML5
+- canvas-api
+
+## Short Elevator Pitch
+PixelPal is a premium, retro-modern browser companion game featuring programmatic 32x32 pixel canvas animations, custom 8-bit synthesizer tones, a fully realized item economy, quests, mini-games, and secure local-storage saves. Built as a Progressive Web App, players can install it directly on desktop and mobile and play completely offline.
+
+## GitHub Social Preview Text
+PixelPal: A Cozy, Installable Browser-Based Virtual Cat Companion with 8-bit Style.
