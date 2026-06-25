@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelPal - Cozy Pixel-Art Cat Companion</title>
+    <!-- Google Fonts: Outfit for sleek modern text, Press Start 2P for retro pixel details -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="logo">
+                <span class="pixel-text">PixelPal</span>
+                <span class="version-badge" id="version-badge" title="Version 2.0 - Click 5 times for Dev Panel">v2.0</span>
+            </div>
+            <div class="header-controls">
+                <div class="volume-control-group">
+                    <button class="sound-toggle-btn" id="sound-toggle-btn" title="Toggle Sound">🔊 Sound On</button>
+                    <input type="range" id="volume-slider" min="0" max="100" value="80" class="volume-slider" title="Adjust Volume">
+                </div>
+                <div class="save-status" id="save-status" title="Your game automatically saves to LocalStorage.">
+                    <span class="status-dot green"></span>
+                    <span class="status-text">Saved to Cloud (Local)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="game-layout">
+            <!-- Left Panel: Stats and Level Info -->
+            <section class="panel stats-panel">
+                <div class="panel-header">
+                    <h2>Stats & Level</h2>
+                </div>
+                
+                <!-- Level Display -->
+                <div class="level-container">
+                    <div class="level-badge">
+                        <span class="lvl-label">LVL</span>
+                        <span class="lvl-value" id="lvl-value">1</span>
+                    </div>
+                    <div class="xp-wrapper">
+                        <div class="xp-labels">
+                            <span>XP Progress</span>
+                            <span id="xp-text">0 / 100</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill xp-fill" id="xp-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coins & Friendship Container -->
+                <div class="economy-container">
+                    <div class="economy-item">
+                        <span class="economy-icon">🪙</span>
+                        <span class="economy-label">Coins:</span>
+                        <span class="economy-val" id="coin-value">100</span>
+                    </div>
+                    <div class="friendship-wrapper">
+                        <div class="friend-labels">
+                            <span>🤝 Friendship Lvl <span id="friend-lvl">1</span></span>
+                            <span id="friend-xp-text">0 / 100</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill friend-fill" id="friend-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Stats -->
+                <div class="stats-list">
+                    <div class="stat-item" data-stat="hunger">
+                        <div class="stat-info">
+                            <span class="stat-icon">🍗</span>
+                            <span class="stat-name">Satiety (Hunger)</span>
+                            <span class="stat-val" id="hunger-value">100/100</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill hunger-fill" id="hunger-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item" data-stat="happiness">
+                        <div class="stat-info">
+                            <span class="stat-icon">💖</span>
+                            <span class="stat-name">Happiness</span>
+                            <span class="stat-val" id="happiness-value">100/100</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill happiness-fill" id="happiness-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item" data-stat="energy">
+                        <div class="stat-info">
+                            <span class="stat-icon">⚡</span>
+                            <span class="stat-name">Energy</span>
+                            <span class="stat-val" id="energy-value">100/100</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill energy-fill" id="energy-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Reward Section -->
+                <div class="daily-reward-card" id="daily-reward-card">
+                    <div class="reward-content">
+                        <h3>🎁 Daily Treat Ready!</h3>
+                        <p>Claim your daily bonus XP and snack.</p>
+                    </div>
+                    <button class="btn btn-reward" id="claim-reward-btn">Claim Reward</button>
+                </div>
+            </section>
+
+            <!-- Center Panel: The Cat Display & Actions -->
+            <section class="main-display-panel">
+                <!-- Cat Thought/Speech Bubble -->
+                <div class="thought-bubble-container">
+                    <div class="thought-bubble" id="thought-bubble">
+                        <span id="thought-text">Mew! Nice to meet you! Zzz...</span>
+                    </div>
+                </div>
+
+                <!-- Cat Canvas Wrapper -->
+                <div class="cat-stage-wrapper" id="cat-stage-wrapper">
+                    <canvas id="cat-canvas" width="256" height="256"></canvas>
+                    <div class="status-overlay-badge" id="status-overlay-badge">Idle</div>
+                    <div id="particles-overlay"></div>
+                </div>
+
+                <!-- Action Controls Grid -->
+                <div class="action-grid">
+                    <button class="btn btn-action" id="btn-feed" title="Feed your cat (+25 Hunger, +5 XP)">
+                        <span class="btn-icon">🍗</span>
+                        <span class="btn-text">Feed</span>
+                    </button>
+                    <button class="btn btn-action" id="btn-play" title="Play with your cat (+20 Happiness, -15 Energy, +15 XP)">
+                        <span class="btn-icon">🎾</span>
+                        <span class="btn-text">Play</span>
+                    </button>
+                    <button class="btn btn-action" id="btn-sleep" title="Put your cat to sleep (Restores Energy, toggles sleep state)">
+                        <span class="btn-icon">💤</span>
+                        <span class="btn-text" id="sleep-btn-text">Sleep</span>
+                    </button>
+                    <button class="btn btn-action" id="btn-pet" title="Pet your cat (+10 Happiness, +5 XP)">
+                        <span class="btn-icon">👋</span>
+                        <span class="btn-text">Pet</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Achievements & Stats -->
+            <section class="panel meta-panel">
+                <!-- Navigation Tabs -->
+                <div class="tab-header">
+                    <button class="tab-btn active" data-tab="tab-achievements">Achievements</button>
+                    <button class="tab-btn" data-tab="tab-stats">Statistics</button>
+                    <button class="tab-btn" data-tab="tab-closet">Closet</button>
+                    <button class="tab-btn" data-tab="tab-shop">Shop</button>
+                    <button class="tab-btn" data-tab="tab-inventory">Inventory</button>
+                    <button class="tab-btn" data-tab="tab-quests">Quests</button>
+                    <button class="tab-btn" data-tab="tab-games">Games</button>
+                    <button class="tab-btn" data-tab="tab-collection">Collection</button>
+                    <button class="tab-btn" data-tab="tab-prestige">Prestige</button>
+                </div>
+
+                <!-- Tab: Achievements -->
+                <div class="tab-content active" id="tab-achievements">
+                    <div class="achievements-list" id="achievements-container">
+                        <!-- Loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Tab: Stats -->
+                <div class="tab-content" id="tab-stats">
+                    <div class="stats-overview">
+                        <div class="overview-stat">
+                            <span class="stat-number" id="stat-days-alive">1</span>
+                            <span class="stat-lbl">Days Alive</span>
+                        </div>
+                        <div class="overview-grid">
+                            <div class="mini-stat">
+                                <span class="mini-label">Total Feeds</span>
+                                <span class="mini-value" id="stat-total-feeds">0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-label">Play Sessions</span>
+                                <span class="mini-value" id="stat-total-plays">0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-label">Pets Given</span>
+                                <span class="mini-value" id="stat-total-pets">0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-label">Level Ups</span>
+                                <span class="mini-value" id="stat-total-levelups">0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- System settings / Reset -->
+                        <div class="settings-actions">
+                            <button class="btn btn-secondary" id="btn-export-save" title="Download backup of your progress.">📤 Export Save</button>
+                            <button class="btn btn-secondary" id="btn-import-save" title="Upload and restore a previous save file.">📥 Import Save</button>
+                            <input type="file" id="save-file-input" accept=".json" style="display: none;">
+                            <button class="btn btn-secondary btn-reset-danger" id="btn-reset" title="Wipe all data and restart.">⚠️ Reset Progress</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Closet -->
+                <div class="tab-content" id="tab-closet">
+                    <div class="closet-container">
+                        <div class="closet-grid" id="closet-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Shop -->
+                <div class="tab-content" id="tab-shop">
+                    <div class="shop-container">
+                        <div class="shop-grid" id="shop-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Inventory -->
+                <div class="tab-content" id="tab-inventory">
+                    <div class="inventory-container">
+                        <div class="inventory-grid" id="inventory-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Quests -->
+                <div class="tab-content" id="tab-quests">
+                    <div class="quests-container">
+                        <h3>Daily Quests</h3>
+                        <div class="quests-list" id="daily-quests-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                        <h3 style="margin-top: 15px;">Weekly Quests</h3>
+                        <div class="quests-list" id="weekly-quests-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Games -->
+                <div class="tab-content" id="tab-games">
+                    <div class="games-container">
+                        <div class="games-list" id="games-selection-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                        <div class="game-stage" id="mini-game-stage" style="display: none;">
+                            <!-- Active mini game loads here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Collection -->
+                <div class="tab-content" id="tab-collection">
+                    <div class="collection-container">
+                        <div class="collection-tabs">
+                            <button class="col-tab active" data-col-type="fish">Fish</button>
+                            <button class="col-tab" data-col-type="toys">Toys</button>
+                            <button class="col-tab" data-col-type="accessories">Accessories</button>
+                            <button class="col-tab" data-col-type="furniture">Furniture</button>
+                        </div>
+                        <div class="collection-grid" id="collection-items-container">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Prestige -->
+                <div class="tab-content" id="tab-prestige">
+                    <div class="prestige-container">
+                        <div class="prestige-card">
+                            <h3>🌟 Rebirth & Prestige</h3>
+                            <p>Reset companion level back to 1 in exchange for permanent bonuses, unique titles, and legendary crown unlock.</p>
+                            <div class="prestige-requirement" id="prestige-requirement-text">
+                                Requires Level 30 (Current Level: <span id="prestige-current-lvl">1</span>)
+                            </div>
+                            <div class="prestige-benefits">
+                                <h4>Prestige Bonuses:</h4>
+                                <ul>
+                                    <li>🪙 +20% Coin Rewards per Rebirth</li>
+                                    <li>✨ +20% XP Gain per Rebirth</li>
+                                    <li>👑 Unlock Prestige Crown Cosmetic</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-reward" id="prestige-claim-btn" disabled>Perform Rebirth</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Onboarding Tutorial Overlay -->
+        <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
+            <div class="tutorial-card">
+                <h3 id="tutorial-title">Welcome to PixelPal!</h3>
+                <p id="tutorial-text">This is your virtual cat companion workspace. Let's learn the basics!</p>
+                <div class="tutorial-footer">
+                    <button class="btn btn-choice" id="btn-tutorial-skip">Skip</button>
+                    <button class="btn btn-equip" id="btn-tutorial-next">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden Developer Panel Overlay -->
+        <div id="dev-panel-overlay" class="dev-overlay" style="display: none;">
+            <div class="dev-card">
+                <div class="dev-header">
+                    <h3>🛠️ Developer Dashboard</h3>
+                    <button class="dev-close-btn" id="btn-dev-close">×</button>
+                </div>
+                <div class="dev-grid">
+                    <div class="dev-stat-item"><span>Level:</span> <strong id="dev-lvl-val">1</strong></div>
+                    <div class="dev-stat-item"><span>XP:</span> <strong id="dev-xp-val">0</strong></div>
+                    <div class="dev-stat-item"><span>Coins:</span> <strong id="dev-coins-val">100</strong></div>
+                    <div class="dev-stat-item"><span>Friendship:</span> <strong id="dev-friend-val">1</strong></div>
+                    <div class="dev-stat-item"><span>Prestige:</span> <strong id="dev-prestige-val">0</strong></div>
+                    <div class="dev-stat-item"><span>Save Version:</span> <strong>v2.0</strong></div>
+                </div>
+                <div class="dev-actions">
+                    <button class="btn btn-choice" id="btn-dev-add-coins">+500 Coins</button>
+                    <button class="btn btn-choice" id="btn-dev-add-xp">+100 XP</button>
+                    <button class="btn btn-choice" id="btn-dev-add-friend">+20 Friend XP</button>
+                    <button class="btn btn-choice" id="btn-dev-lvl-up">Instant Level Up</button>
+                    <button class="btn btn-choice" id="btn-dev-skip-time">Fast Forward (12h)</button>
+                </div>
+            </div>
+        </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
